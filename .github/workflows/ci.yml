@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rust-src
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+
+      - name: Build Green Compress
+        run: make rust CARGO=cargo
+
+      - name: Run synthetic benchmark
+        run: bash benchmarks/run.sh config/synthetic_benchmark.json
+
+      - name: Rust check (debug)
+        run: make rust-check CARGO=cargo
