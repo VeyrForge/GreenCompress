@@ -2,8 +2,18 @@
 
 All notable changes to Green Compress (`greencompress`).
 
+## [Unreleased]
+
+## [1.1.0] — 2026-07-13
+
+- Added **`export-gguf`** CLI command (Phase 1): preserves GGUF metadata, tokenizer, norms, embeddings, and output weights; re-quantizes 2D weight tensors to Q4_0 for llama.cpp fallback. Optional `--verify` checks output readability.
+- Added **`pack-model`** CLI command (Phase 2 foundation, **experimental**): writes `model.green/` with `manifest.json`, `metadata.gguf`, `dense.gguf`, stub `experts-000.greenpack`, and `checksums.json`.
+- README updated with honest scope: compression/benchmarking/layer inference today; full Green Engine runtime package planned via `pack-model`.
+- Added `scripts/export_gguf.py`, `scripts/pack_model.py`, `scripts/gguf_util.py`, and synthetic fixture helper `scripts/make_test_gguf.py`.
+
 ### All versions (newest first)
 
+- 1.1.0
 - 1.0.0
 - 0.9.0
 - 0.8.0

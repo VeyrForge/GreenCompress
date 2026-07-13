@@ -6,6 +6,7 @@ use greencompress::backend::ComputeBackend;
 use greencompress::benchmark::cmd_benchmark;
 use greencompress::benchmark_compare::cmd_compare_benchmark;
 use greencompress::cmd_io::{cmd_export_f32, cmd_gen_activations, cmd_gen_matrix, cmd_import_f32, cmd_import_npy};
+use greencompress::cmd_gguf::{cmd_export_gguf, cmd_pack_model};
 use greencompress::cmd_quant::{cmd_eval, cmd_q4, cmd_repair};
 use greencompress::infer::{cmd_infer, cmd_infer_server, cmd_prepack};
 use greencompress::sweep::cmd_compare_sweep;
@@ -64,6 +65,8 @@ fn run(args: &[String]) -> greencompress::Result<()> {
         }
         "compare-sweep" => cmd_compare_sweep(&parsed),
         "compare-benchmark" => cmd_compare_benchmark(&parsed),
+        "export-gguf" => cmd_export_gguf(&parsed),
+        "pack-model" => cmd_pack_model(&parsed),
         "qn-bench" => greencompress::qn::cmd_qn_bench(&parsed),
         "moe-infer" => greencompress::moe::cmd_moe_infer(&parsed),
         "moe-synth" => greencompress::moe::cmd_moe_synth(&parsed),

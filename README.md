@@ -4,7 +4,11 @@
 
 Green Compress (`greencompress`) is a Rust toolkit for **post-training weight compression** and **layer inference**. Quantize LLM weights to Q4/Q8, apply green-format repair (low-rank, sparse, outliers), benchmark quality vs RAM vs speed, and run matmul with **AVX2 SIMD** — optional **CUDA** for the heavy GEMM.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue)](rust/Cargo.toml)
+**What it does today:** tensor extraction from GGUF, per-layer compression and benchmarking, and individual layer inference.
+
+**What it does not do yet:** produce a full native Green runtime model package (`.green`) for end-to-end token generation via [Green Engine](https://github.com/VeyrForge/GreenEngine). Use Phase 1 export for a runnable llama.cpp fallback until Phase 2+ pack-model is complete.
+
+[![Version](https://img.shields.io/badge/version-1.1.0-blue)](rust/Cargo.toml)
 [![Rust](https://img.shields.io/badge/rust-stable-orange)](https://rustup.rs/)
 [![License: Source-Available](https://img.shields.io/badge/license-Source--Available-orange)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)](#installation)
@@ -31,7 +35,7 @@ make
 bin/greencompress help
 ```
 
-Requires [Rust stable](https://rustup.rs()). Linux is recommended for the POSIX shared-memory infer-server; other platforms can use pipe transport.
+Requires [Rust stable](https://rustup.rs/). Linux is recommended for the POSIX shared-memory infer-server; other platforms can use pipe transport.
 
 ```bash
 make                # portable x86-64 (AVX2 at runtime if present)
@@ -90,7 +94,14 @@ Real-model example (Llama-3.2-1B `ffn_down`): **green_optimal** at **99.56%** qu
 
 Policy file: [`config/tensor_policy.json`](config/tensor_policy.json)
 
-GGUF pipeline: `python3 scripts/compress_model.py --gguf MODEL.gguf --out WORK --methods green_optimal`
+### Model export roadmap
+
+| Phase | Command | Output | Status |
+|-------|---------|--------|--------|
+| **1** | `greencompress export-gguf --gguf MODEL.gguf --out MODEL-green-q4.gguf [--method green_optimal] [--verify]` | Runnable compressed GGUF for **llama.cpp** fallback (metadata, tokenizer, norms, embeddings, output weights preserved; 2D weights re-quantized to Q4_0 baseline) | **Available** |
+| **2+** | `greencompress pack-model --gguf MODEL.gguf --out MODEL.green [--method green_optimal] [--verify]` | Native `.green` directory (`manifest.json`, `metadata.gguf`, `dense.gguf`, expert shards) | **Experimental / in progress** |
+
+Research pipeline (per-tensor benchmarks, no single-file export): `python3 scripts/compress_model.py --gguf MODEL.gguf --out WORK --methods green_optimal`
 
 ---
 
@@ -115,6 +126,9 @@ Reproduce: `bash benchmarks/run.sh` · Full tables in synthetic runs under `out/
 
 ## Limitations
 
+- Does **not** yet ship a complete Green Engine runtime model; use `export-gguf` for llama.cpp or per-layer tools for compression research.
+- Phase 1 `export-gguf` applies **Q4_0 re-quantization** on 2D weights (Q4_K_M target; full green repair in GGUF export is planned).
+- Phase 2 `pack-model` writes a valid manifest and shards; expert `.greenpack` compression is stubbed.
 - If FP32 already fits in RAM and is fastest, stay on FP32.
 - GGUF compression requires `python3`, `numpy`, and `gguf`.
 - GPU inference needs CUDA toolkit for `make rust-gpu`.

@@ -8,12 +8,15 @@
 //! - **MoE:** [`moe`], [`expert_cache`] — LRU-budgeted expert layers
 //!
 //! # Model compression
+//! - GGUF export (Phase 1): `greencompress export-gguf` → `scripts/export_gguf.py`
+//! - Green pack (Phase 2): `greencompress pack-model` → `scripts/pack_model.py`
 //! - GGUF extract: `scripts/extract_gguf.py` (used by `scripts/compress_model.py`)
 //! - Prepack for lower RAM at inference: `greencompress prepack --layer-dir DIR`
 
 pub mod backend;
 pub mod benchmark;
 pub mod benchmark_compare;
+pub mod cmd_gguf;
 pub mod cmd_io;
 pub mod cmd_quant;
 pub mod error;

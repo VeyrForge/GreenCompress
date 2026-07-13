@@ -19,11 +19,14 @@ pub fn parse_args(args: &[String]) -> Result<Args> {
         if !key.starts_with("--") {
             return Err(fail(format!("expected --key, got: {key}")));
         }
-        if i + 1 >= args.len() {
-            return Err(fail(format!("missing value for: {key}")));
+        let flag = key[2..].to_string();
+        if i + 1 >= args.len() || args[i + 1].starts_with("--") {
+            values.insert(flag, "true".to_string());
+            i += 1;
+        } else {
+            values.insert(flag, args[i + 1].clone());
+            i += 2;
         }
-        values.insert(key[2..].to_string(), args[i + 1].clone());
-        i += 2;
     }
     Ok(Args { command, values })
 }
@@ -65,6 +68,13 @@ pub fn get_u32_flag(args: &Args, key: &str, default: u32) -> u32 {
         .get(key)
         .and_then(|v| v.parse().ok())
         .unwrap_or(default)
+}
+
+pub fn get_bool(args: &Args, key: &str, default: bool) -> bool {
+    match args.values.get(key) {
+        Some(v) => matches!(v.as_str(), "1" | "true" | "yes" | "on"),
+        None => default,
+    }
 }
 
 pub fn print_size(label: &str, bytes: u64) {
@@ -166,4 +176,6 @@ pub fn print_help() {
     println!("  prepack --layer-dir DIR");
     println!("  compare-sweep --dir out/sweep [--dir-b out/real_sweep] [--label synthetic] [--label-b real]");
     println!("  compare-benchmark --dir out/benchmark/synthetic");
+    println!("  export-gguf --gguf model.gguf --out model-green-q4.gguf [--method green_optimal] [--verify]");
+    println!("  pack-model --gguf model.gguf --out model.green [--method green_optimal] [--verify]  (experimental)");
 }
